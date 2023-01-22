@@ -8,6 +8,7 @@
 import os
 import re
 from bs4 import BeautifulSoup
+from .diff_match_patch import diff_match_patch
 import html
 
 
@@ -233,8 +234,9 @@ class="ftb" style="width: {2}em" /><script type="text/javascript">setUpFillBlank
         for index, field in enumerate(ctx.entries):
             cor = field.valueAsPlainText
             given = ctx.answers[index] if ctx.answers and len(ctx.answers) == len(ctx.entries) else "None"
-            field_res = self.format_field_result(given, cor)
-            result = re.sub(r'<span class="?cloze\s*"?(\s*data-ordinal="\d\d?")?>%s</span>' % re.escape(field.value),
+            original = field.value
+            field_res = self.format_field_result(given, cor, original)
+            result = re.sub(r'<span class="?cloze\s*"?(\s*data-ordinal="\d\d?")?>%s</span>' % re.escape(original),
                             field_res.replace('\\', r'\\'), result, 1)
 
         # copy from reviewer original
@@ -251,14 +253,42 @@ class="ftb" style="width: {2}em" /><script type="text/javascript">setUpFillBlank
 
         return re.sub(reviewer.typeAnsPat, repl, result)
 
-    def format_field_result(self, given: str, expected: str):
+    def format_field_result(self, given: str, expected: str, original: str):
         given = given.strip()
         expected = expected.strip()
-        if given == expected:
-            return "<span class='cloze st-ok'>%s</span>" % html.escape(expected)
-        if self.isIgnoreCase and given.lower() == expected.lower():
-            return "<span class='cloze st-ok'>%s</span>" % html.escape(expected)
-        return "<span class='cloze st-expected'>%s</span> <span class='cloze st-error'>(%s)</span>" % (html.escape(expected), html.escape(given))
+        if given == expected or (self.isIgnoreCase and given.lower() == expected.lower()):
+            # return "<span class='cloze st-ok'>%s</span>" % html.escape(expected)
+            return f'<span class="type-multi-cloze-result correct">{original}</span>'
+        
+        # Generate inline-comparison:
+        dmp = diff_match_patch()
+        diffs = dmp.diff_main(given, expected)
+        dmp.diff_cleanupSemantic(diffs)
+        output = self.diff_prettyHtml(dmp, diffs)
+        # return "<span class='cloze st-expected'>%s</span> <span class='cloze st-error'>(%s)</span>" % (html.escape(expected), html.escape(given))
+        return f'<span class="type-multi-cloze-result incorrect">{output}</span>'
+
+    def diff_prettyHtml(self, dmp, diffs):
+        """Convert a diff array into a pretty HTML report.
+        Customized version of diff_match_patch#diff_prettyHtml.
+
+        Args:
+        dmp: instance of diff_match_patch class.
+            diffs: Array of diff tuples.
+
+        Returns:
+            HTML representation.
+        """
+        elements = []
+        for (op, data) in diffs:
+                text = html.escape(data)
+                if op == dmp.DIFF_INSERT:
+                        elements.append('<ins class="diff-missing">%s</ins>' % text)
+                elif op == dmp.DIFF_DELETE:
+                        elements.append('<del class="diff-wrong">%s</del>' % text)
+                elif op == dmp.DIFF_EQUAL:
+                        elements.append("<span>%s</span>" % text)
+        return "".join(elements)
 
     def clear_correct_value_as_reviewer(self, valueAsBeautifulSoupText: str):
         """Mostly copy from original reviewer code *as plain text*"""

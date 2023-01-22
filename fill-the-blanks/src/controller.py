@@ -55,6 +55,19 @@ input.st-ok {
     color: #3bd03b;
 }
 
+.type-multi-cloze-result.correct {
+    border-bottom: 0.2em solid rgb(100, 255, 148);
+}
+.type-multi-cloze-result.incorrect {
+    border-bottom: 0.2em solid rgb(255, 150, 154);
+}
+.type-multi-cloze-result ins.diff-missing {
+    background-color: rgb(193, 193, 193);
+}
+.type-multi-cloze-result del.diff-wrong {
+    background-color: rgb(255, 150, 154);
+}
+
 </style>
 """
 
