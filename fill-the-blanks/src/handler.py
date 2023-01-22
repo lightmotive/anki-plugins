@@ -258,7 +258,7 @@ class="ftb" style="width: {2}em" /><script type="text/javascript">setUpFillBlank
         expected = expected.strip()
         if given == expected or (self.isIgnoreCase and given.lower() == expected.lower()):
             # return "<span class='cloze st-ok'>%s</span>" % html.escape(expected)
-            return f'<span class="type-multi-cloze-result correct">{original}</span>'
+            return f'<span class="type-multi-cloze-result correct" title="Correct, keep it up!">{original}</span>'
         
         # Generate inline-comparison:
         dmp = diff_match_patch()
@@ -266,7 +266,7 @@ class="ftb" style="width: {2}em" /><script type="text/javascript">setUpFillBlank
         dmp.diff_cleanupSemantic(diffs)
         output = self.diff_prettyHtml(dmp, diffs)
         # return "<span class='cloze st-expected'>%s</span> <span class='cloze st-error'>(%s)</span>" % (html.escape(expected), html.escape(given))
-        return f'<span class="type-multi-cloze-result incorrect">{output}</span>'
+        return f'<span class="type-multi-cloze-result incorrect" title="Incorrect, see highlights...">{output}</span>'
 
     def diff_prettyHtml(self, dmp, diffs):
         """Convert a diff array into a pretty HTML report.
@@ -281,13 +281,13 @@ class="ftb" style="width: {2}em" /><script type="text/javascript">setUpFillBlank
         """
         elements = []
         for (op, data) in diffs:
-                text = html.escape(data)
-                if op == dmp.DIFF_INSERT:
-                        elements.append('<ins class="diff-missing">%s</ins>' % text)
-                elif op == dmp.DIFF_DELETE:
-                        elements.append('<del class="diff-wrong">%s</del>' % text)
-                elif op == dmp.DIFF_EQUAL:
-                        elements.append("<span>%s</span>" % text)
+            text = html.escape(data)
+            if op == dmp.DIFF_INSERT:
+                elements.append('<ins class="diff-missing" title="missed">%s</ins>' % text)
+            elif op == dmp.DIFF_DELETE:
+                elements.append('<del class="diff-wrong" title="incorrect">%s</del>' % text)
+            elif op == dmp.DIFF_EQUAL:
+                elements.append("<span>%s</span>" % text)
         return "".join(elements)
 
     def clear_correct_value_as_reviewer(self, valueAsBeautifulSoupText: str):
