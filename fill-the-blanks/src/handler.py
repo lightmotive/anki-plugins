@@ -266,7 +266,9 @@ class="ftb" style="width: {2}em" /><script type="text/javascript">setUpFillBlank
         dmp.diff_cleanupSemantic(diffs)
         output = self.diff_prettyHtml(dmp, diffs)
         # return "<span class='cloze st-expected'>%s</span> <span class='cloze st-error'>(%s)</span>" % (html.escape(expected), html.escape(given))
-        return f'<span class="type-multi-cloze-result incorrect" title="Incorrect, see highlights...">{output}</span>'
+        incorrect_title = html.escape(f"Expected text\n{'-' * 14}\n\n{expected}")
+        # TODO: Implement a tooltip that remains visible and supports formatting.
+        return f'<code class="type-multi-cloze-result incorrect" title="{incorrect_title}">{output}</code>'
 
     def diff_prettyHtml(self, dmp, diffs):
         """Convert a diff array into a pretty HTML report.
