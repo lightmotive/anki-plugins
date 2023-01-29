@@ -55,6 +55,10 @@ input.st-ok {
     color: #3bd03b;
 }
 
+.type-multi-cloze-result {
+    display: inline-block;
+    margin-bottom: 0.2em;
+}
 .type-multi-cloze-result.correct {
     border-bottom: 0.2em solid rgb(100, 255, 148);
 }
