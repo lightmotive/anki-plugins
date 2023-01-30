@@ -57,6 +57,7 @@ input.st-ok {
 
 .type-multi-cloze-result {
     display: inline-block;
+    margin-top: 0.2em;
     margin-bottom: 0.2em;
 }
 .type-multi-cloze-result.correct {
